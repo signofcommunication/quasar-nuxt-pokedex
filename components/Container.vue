@@ -1,16 +1,16 @@
 <script setup>
-import { ref, watchEffect, onMounted } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 const current = ref(2);
 let pokemonList = ref([]);
 const isLoading = ref(true);
+const search = ref('');
 
+// Fetch paginated Pokémon list when `current` changes
 watchEffect(async () => {
   isLoading.value = true;
 
-  const { data } = await useFetch(`https://pokeapi.co/api/v2/pokemon/?limit=40&offset=${current.value}0`);
-
-  console.log(current.value)
+  const { data } = await useFetch(`https://pokeapi.co/api/v2/pokemon/?limit=40&offset=${(current.value - 1) * 40}`);
 
   if (data.value?.results) {
     pokemonList.value = data.value.results.map((pokemon) => ({
@@ -21,6 +21,29 @@ watchEffect(async () => {
 
   isLoading.value = false;
 });
+
+// Function to search Pokémon by name
+async function getPokemonByName() {
+  if (!search.value) return;
+
+  isLoading.value = true;
+
+  // Fetch Pokémon by name
+  const { data } = await useFetch(`https://pokeapi.co/api/v2/pokemon/${search.value.toLowerCase()}`);
+
+  if (data.value) {
+    pokemonList.value = [
+      {
+        name: data.value.name,
+        imageUrl: `https://img.pokemondb.net/artwork/large/${data.value.name}.jpg`,
+      },
+    ];
+  } else {
+    pokemonList.value = []; // Clear the list if no Pokémon is found
+  }
+
+  isLoading.value = false;
+}
 </script>
 
 <template>
@@ -30,13 +53,15 @@ watchEffect(async () => {
         for="small-input"
         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
       >
-        Small Pokemon
+        Search Pokémon
       </label>
       <input
         type="text"
         id="small-input"
         class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        v-model="search"
       />
+      <button @click="getPokemonByName">Search</button>
     </div>
 
     <!-- Display loader while data is being fetched -->
