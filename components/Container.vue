@@ -19,8 +19,7 @@ interface PokemonDetails {
   name: string;
 }
 
-// Fetch paginated Pokémon list when `current` changes
-watchEffect(async () => {
+async function getPokemons() {
   isLoading.value = true;
 
   const { data } = await useFetch<PokemonResponse>(`https://pokeapi.co/api/v2/pokemon/?limit=40&offset=${(current.value - 1) * 40}`);
@@ -33,11 +32,11 @@ watchEffect(async () => {
   }
 
   isLoading.value = false;
-});
+}
 
-// Function to search Pokémon by name
+watchEffect(async () => getPokemons());
+
 async function getPokemonByName() {
-  if (!search.value) return;
 
   isLoading.value = true;
 
@@ -52,7 +51,7 @@ async function getPokemonByName() {
       },
     ];
   } else {
-    pokemonList.value = []; // Clear the list if no Pokémon is found
+    pokemonList.value = [];
   }
 
   isLoading.value = false;
