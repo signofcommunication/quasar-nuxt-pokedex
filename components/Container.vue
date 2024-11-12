@@ -2,18 +2,31 @@
 import { ref, watchEffect } from 'vue';
 
 const current = ref(1);
-let pokemonList = ref([]);
+const pokemonList = ref<{ name: string; imageUrl: string }[]>([]);
 const isLoading = ref(true);
 const search = ref('');
+
+interface Pokemon {
+  name: string;
+  imageUrl: string;
+}
+
+interface PokemonResponse {
+  results: Pokemon[];
+}
+
+interface PokemonDetails {
+  name: string;
+}
 
 // Fetch paginated Pokémon list when `current` changes
 watchEffect(async () => {
   isLoading.value = true;
 
-  const { data } = await useFetch(`https://pokeapi.co/api/v2/pokemon/?limit=40&offset=${(current.value - 1) * 40}`);
+  const { data } = await useFetch<PokemonResponse>(`https://pokeapi.co/api/v2/pokemon/?limit=40&offset=${(current.value - 1) * 40}`);
 
   if (data.value?.results) {
-    pokemonList.value = data.value.results.map((pokemon) => ({
+    pokemonList.value = data.value.results.map((pokemon: Pokemon) => ({
       name: pokemon.name,
       imageUrl: `https://img.pokemondb.net/artwork/large/${pokemon.name}.jpg`,
     }));
@@ -29,7 +42,7 @@ async function getPokemonByName() {
   isLoading.value = true;
 
   // Fetch Pokémon by name
-  const { data } = await useFetch(`https://pokeapi.co/api/v2/pokemon/${search.value.toLowerCase()}`);
+  const { data } = await useFetch<PokemonDetails>(`https://pokeapi.co/api/v2/pokemon/${search.value.toLowerCase()}`);
 
   if (data.value) {
     pokemonList.value = [
