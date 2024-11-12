@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watchEffect } from 'vue';
 
-const current = ref(2);
+const current = ref(1);
 let pokemonList = ref([]);
 const isLoading = ref(true);
 const search = ref('');
@@ -69,6 +69,11 @@ async function getPokemonByName() {
 
     <!-- Display Pokémon list once data is loaded -->
     <div v-else class="flex items-center justify-center">
+      <div v-if="pokemonList.length === 0">
+        <p>
+          No pokemon with name <b>{{ search }}</b>
+        </p>
+      </div>
       <div
         v-for="pokemon in pokemonList"
         :key="pokemon.name"
