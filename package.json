@@ -12,6 +12,7 @@
   "dependencies": {
     "nuxt": "^3.14.0",
     "nuxt-quasar-ui": "^2.1.6",
+    "postcss": "^8.4.49",
     "vue": "latest",
     "vue-router": "latest"
   },
